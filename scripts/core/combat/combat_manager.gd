@@ -50,7 +50,11 @@ func start_combat() -> void:
 	_start_round()
 
 func player_hit() -> void:
-	pass
+	_deal_to_player()
+	var total := _player_total()
+	if total > 21:
+		player_bust.emit(total)
+		_resolve_round("monster_win")
 
 func player_stand() -> void:
 	pass
