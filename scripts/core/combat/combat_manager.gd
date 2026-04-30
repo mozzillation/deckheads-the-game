@@ -114,5 +114,16 @@ func _compare_hands() -> String:
 	else:
 		return "tie"
 
-func _resolve_round(_outcome: String) -> void:
-	pass
+func _resolve_round(outcome: String) -> void:
+	round_resolved.emit(outcome)
+	match outcome:
+		"player_win":
+			monster_hp -= 1
+		"monster_win":
+			player.take_damage(monster.base_damage)
+	if monster_hp <= 0:
+		combat_ended.emit(Target.PLAYER)
+	elif not player.is_alive():
+		combat_ended.emit(Target.MONSTER)
+	else:
+		_start_round()
