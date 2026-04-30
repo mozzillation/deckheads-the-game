@@ -29,3 +29,5 @@ enum Rarity {
 @export var type: Type = Type.UNKNOWN
 @export var rarity: Rarity = Rarity.COMMON
 @export var base_damage: int = 1
+@export var hp: int = 1
+@export var dealer_style: MonsterDealerStyle
