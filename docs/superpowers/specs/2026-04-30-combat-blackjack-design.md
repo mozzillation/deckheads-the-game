@@ -38,7 +38,7 @@ Default implementation: hit below 17, stand at 17 and above.
 
 ```gdscript
 func should_hit(hand_total: int) -> bool:
-    return hand_total < 17
+	return hand_total < 17
 ```
 
 Future playing styles (e.g. "aggressive", "never hits twice") are new subclasses of `MonsterDealer` assigned to monster resources — no changes to `CombatManager`.
@@ -148,14 +148,14 @@ A short delay between each monster draw so the player can follow the monster's t
 
 ```
 scripts/core/combat/
-    combat_manager.gd
+	combat_manager.gd
 scripts/core/monsters/
-    monster.gd          (modified: add hp, dealer)
-    monster_dealer.gd   (new base class)
-    standard_dealer.gd  (new)
+	monster.gd          (modified: add hp, dealer)
+	monster_dealer.gd   (new base class)
+	standard_dealer.gd  (new)
 scenes/combat/
-    combat.tscn
-    combat_controller.gd
+	combat.tscn
+	combat_controller.gd
 ```
 
 ---

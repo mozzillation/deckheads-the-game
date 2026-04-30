@@ -23,9 +23,17 @@ extends Resource
 ## Flat bonus added to every hand total (e.g. a relic that counts as +1).
 @export var hand_bonus: int = 0
 
+## Base HP ceiling before bonuses.
+@export var base_damage: int = 1
+
+@export var strength: int = 0
+
 # ---
 # Functions
 # ---
 
 func max_hp() -> int:
 	return base_max_hp + max_hp_bonus
+
+func damage() -> int:
+	return base_damage + strength

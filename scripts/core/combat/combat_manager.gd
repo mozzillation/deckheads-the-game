@@ -28,7 +28,6 @@ signal combat_ended(winner: Target)
 
 var player: Player
 var monster: Monster
-var monster_hp: int
 var deck: Deck
 var player_hand: Array[CardRef] = []
 var monster_hand: Array[CardRef] = []
@@ -40,7 +39,7 @@ var monster_hand: Array[CardRef] = []
 func _init(p_player: Player, p_monster: Monster) -> void:
 	player = p_player
 	monster = p_monster
-	monster_hp = p_monster.hp
+	monster.max_hp = monster.hp
 
 # ---
 # Functions
@@ -55,10 +54,13 @@ func player_hit() -> void:
 	if total > 21:
 		player_bust.emit(total)
 		_resolve_round("monster_win")
+	else:
+		player_turn_ready.emit()
 
 func player_stand() -> void:
 	card_revealed.emit(monster_hand[1])
-	while monster.dealer.should_hit(_monster_total()):
+	print(monster.dealer_style)
+	while monster.dealer_style.should_hit(_monster_total()):
 		_deal_to_monster(false)
 		if _monster_total() > 21:
 			monster_bust.emit(_monster_total())
@@ -118,10 +120,10 @@ func _resolve_round(outcome: String) -> void:
 	round_resolved.emit(outcome)
 	match outcome:
 		"player_win":
-			monster_hp -= 1
+			monster.take_damage(player.stats.damage())
 		"monster_win":
 			player.take_damage(monster.base_damage)
-	if monster_hp <= 0:
+	if not monster.is_alive():
 		combat_ended.emit(Target.PLAYER)
 	elif not player.is_alive():
 		combat_ended.emit(Target.MONSTER)

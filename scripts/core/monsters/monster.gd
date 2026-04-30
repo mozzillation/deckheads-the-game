@@ -2,6 +2,13 @@ class_name Monster
 extends Resource
 
 # ---
+# Signals
+# ---
+
+signal hp_changed(current: int, maximum: int)
+signal died
+
+# ---
 # Enums
 # ---
 
@@ -31,3 +38,18 @@ enum Rarity {
 @export var base_damage: int = 1
 @export var hp: int = 1
 @export var dealer_style: MonsterDealerStyle
+
+var max_hp: int
+
+# ---
+# Functions
+# ---
+
+func take_damage(amount: int) -> void:
+	hp = max(hp - amount, 0)
+	hp_changed.emit(hp, max_hp)
+	if hp == 0:
+		died.emit()
+
+func is_alive() -> bool:
+	return hp > 0

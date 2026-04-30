@@ -32,8 +32,8 @@ enum Suit {
 # Variables
 # ---
 
-var rank: Rank
-var suit: Suit
+var rank: Rank = Rank.ACE
+var suit: Suit = Suit.HEARTS
 
 # ---
 # Lifecycle

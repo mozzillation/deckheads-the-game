@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://bh4d14pygadm7"]
+
+[ext_resource type="Script" uid="uid://g74yjtnju2mw" path="res://scenes/combat/combat_controller.gd" id="1_jecyb"]
+[ext_resource type="Resource" uid="uid://c4xbyiyrh37ff" path="res://resources/monsters/goblin.tres" id="2_7cuye"]
+
+[node name="CombatScene" type="Node2D" unique_id=564923855]
+script = ExtResource("1_jecyb")
+monster = ExtResource("2_7cuye")
+
+[node name="BackgroundLayer" type="CanvasLayer" parent="." unique_id=388301393]
+
+[node name="Background" type="ColorRect" parent="BackgroundLayer" unique_id=245667364]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
