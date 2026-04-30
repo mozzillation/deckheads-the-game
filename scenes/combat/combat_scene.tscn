@@ -16,3 +16,34 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
+
+[node name="UILayer" type="CanvasLayer" parent="." unique_id=102938475]
+
+[node name="Padding" type="MarginContainer" parent="UILayer" unique_id=634817293]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Table" type="VBoxContainer" parent="UILayer/Padding" unique_id=755929358]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="MonsterHand" type="HBoxContainer" parent="UILayer/Padding/Table" unique_id=192837465]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 2
+
+[node name="PlayerHand" type="HBoxContainer" parent="UILayer/Padding/Table" unique_id=918273645]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_constants/separation = 4

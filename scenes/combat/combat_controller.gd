@@ -11,13 +11,20 @@ signal combat_finished(winner: CombatManager.Target)
 # Variables
 # ---
 
+const CARD_VIEW = preload("res://scenes/components/card_view/card_view.tscn")
+
 @export var monster: Monster
+@export var reveal_delay: float = 0.5
 @export var monster_deal_delay: float = 0.5
+
+@onready var _player_hand_container: HBoxContainer = %PlayerHand
+@onready var _monster_hand_container: HBoxContainer = %MonsterHand
 
 var _manager: CombatManager
 var _is_player_turn: bool = false
 var _event_queue: Array = []
 var _processing_queue: bool = false
+var _monster_hole_card_view: CardViewController = null
 
 # ---
 # Lifecycle
@@ -26,7 +33,6 @@ var _processing_queue: bool = false
 func _ready() -> void:
 	var stats := PlayerStats.new()
 	var player := Player.new(stats)
-	
 	setup(player)
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -48,6 +54,7 @@ func setup(player: Player) -> void:
 		player.hp, monster.display_name, monster.hp
 	])
 	_manager = CombatManager.new(player, monster)
+	_manager.round_started.connect(func(): _enqueue("round_started", null))
 	_manager.card_dealt.connect(func(t, c, fd): _enqueue("card_dealt", [t, c, fd]))
 	_manager.card_revealed.connect(func(c): _enqueue("card_revealed", c))
 	_manager.player_turn_ready.connect(func(): _enqueue("player_turn_ready", null))
@@ -59,7 +66,6 @@ func setup(player: Player) -> void:
 
 func _on_hit_pressed() -> void:
 	if not _is_player_turn:
-		print("NOT PLAYER TURN")
 		return
 	_is_player_turn = false
 	_manager.player_hit()
@@ -88,6 +94,8 @@ func _process_queue() -> void:
 
 func _handle_event(event: Dictionary) -> void:
 	match event["type"]:
+		"round_started":
+			_clear_hands()
 		"card_dealt":
 			var args: Array = event["data"]
 			var target: CombatManager.Target = args[0]
@@ -124,17 +132,35 @@ func _handle_event(event: Dictionary) -> void:
 			print("=== COMBAT OVER: %s wins! ===" % _target_name(winner))
 			combat_finished.emit(event["data"])
 
+func _clear_hands() -> void:
+	for child in _player_hand_container.get_children():
+		child.queue_free()
+	for child in _monster_hand_container.get_children():
+		child.queue_free()
+	_monster_hole_card_view = null
+
 func _target_name(target: CombatManager.Target) -> String:
 	return "Player" if target == CombatManager.Target.PLAYER else "Monster"
 
-func _animate_deal(_target: CombatManager.Target, _card: CardRef, _face_down: bool) -> void:
-	pass
+func _animate_deal(target: CombatManager.Target, card: CardRef, face_down: bool) -> void:
+	var view: CardViewController = CARD_VIEW.instantiate()
+	var container := _player_hand_container if target == CombatManager.Target.PLAYER else _monster_hand_container
+	container.add_child(view)
+	if target == CombatManager.Target.MONSTER:
+		container.move_child(view, 0)
+	view.setup(card, face_down)
+	if face_down:
+		_monster_hole_card_view = view
+	await view.animate_in()
 
-func _animate_reveal(_card: CardRef) -> void:
-	pass
+func _animate_reveal(card: CardRef) -> void:
+	if _monster_hole_card_view:
+		await _monster_hole_card_view.reveal(card)
+		_monster_hole_card_view = null
+	await get_tree().create_timer(reveal_delay).timeout
 
 func _animate_bust(_target: String) -> void:
-	pass
+	await get_tree().create_timer(0.8).timeout
 
 func _set_buttons_enabled(_enabled: bool) -> void:
 	pass

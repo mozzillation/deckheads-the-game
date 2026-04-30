@@ -14,6 +14,7 @@ enum Target {
 # Signals
 # ---
 
+signal round_started
 signal card_dealt(target: Target, card: CardRef, face_down: bool)
 signal card_revealed(card: CardRef)
 signal player_turn_ready
@@ -59,7 +60,6 @@ func player_hit() -> void:
 
 func player_stand() -> void:
 	card_revealed.emit(monster_hand[1])
-	print(monster.dealer_style)
 	while monster.dealer_style.should_hit(_monster_total()):
 		_deal_to_monster(false)
 		if _monster_total() > 21:
@@ -69,12 +69,13 @@ func player_stand() -> void:
 	_resolve_round(_compare_hands())
 
 func _start_round() -> void:
+	round_started.emit()
 	deck = Deck.new()
 	player_hand.clear()
 	monster_hand.clear()
 	_deal_to_player()
-	_deal_to_player()
 	_deal_to_monster(false)
+	_deal_to_player()
 	_deal_to_monster(true)
 	player_turn_ready.emit()
 
