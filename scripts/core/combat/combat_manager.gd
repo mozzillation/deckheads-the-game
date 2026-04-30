@@ -59,6 +59,11 @@ func _start_round() -> void:
 	deck = Deck.new()
 	player_hand.clear()
 	monster_hand.clear()
+	_deal_to_player()
+	_deal_to_player()
+	_deal_to_monster(false)
+	_deal_to_monster(true)
+	player_turn_ready.emit()
 
 func _deal_to_player() -> void:
 	var card := deck.draw()
