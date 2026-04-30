@@ -57,7 +57,14 @@ func player_hit() -> void:
 		_resolve_round("monster_win")
 
 func player_stand() -> void:
-	pass
+	card_revealed.emit(monster_hand[1])
+	while monster.dealer.should_hit(_monster_total()):
+		_deal_to_monster(false)
+		if _monster_total() > 21:
+			monster_bust.emit(_monster_total())
+			_resolve_round("player_win")
+			return
+	_resolve_round(_compare_hands())
 
 func _start_round() -> void:
 	deck = Deck.new()
