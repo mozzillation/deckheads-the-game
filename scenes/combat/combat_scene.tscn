@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://g74yjtnju2mw" path="res://scenes/combat/combat_controller.gd" id="1_jecyb"]
 [ext_resource type="Resource" uid="uid://c4xbyiyrh37ff" path="res://resources/monsters/goblin.tres" id="2_7cuye"]
+[ext_resource type="PackedScene" uid="uid://i12ng8ldvho" path="res://scenes/components/health_bar/health_bar.tscn" id="3_fyyo7"]
 
 [node name="CombatScene" type="Node2D" unique_id=564923855]
 script = ExtResource("1_jecyb")
@@ -47,3 +48,25 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 theme_override_constants/separation = 4
+
+[node name="PlayerHealthBar" parent="UILayer" unique_id=750063837 instance=ExtResource("3_fyyo7")]
+unique_name_in_owner = true
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -17.0
+offset_right = 56.0
+offset_bottom = -8.0
+grow_vertical = 0
+
+[node name="MonsterHealthBar" parent="UILayer" unique_id=547446465 instance=ExtResource("3_fyyo7")]
+unique_name_in_owner = true
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -56.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 23.0
+grow_horizontal = 0

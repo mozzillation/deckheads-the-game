@@ -16,7 +16,6 @@ signal died
 var stats: PlayerStats
 var hp: int
 var gold: int
-var damage: int
 
 # ---
 # Lifecycle
@@ -26,7 +25,6 @@ func _init(p_stats: PlayerStats) -> void:
 	stats = p_stats
 	hp = stats.max_hp()
 	gold = 0
-	damage = stats.damage()
 
 # ---
 # Functions

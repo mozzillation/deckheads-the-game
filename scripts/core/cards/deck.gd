@@ -30,7 +30,8 @@ func shuffle() -> void:
 
 func draw() -> CardRef:
 	if _cards.is_empty():
-		_init()
+		generate()
+		shuffle()
 	return _cards.pop_back()
 
 func remaining() -> int:

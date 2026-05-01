@@ -15,10 +15,11 @@ const CARD_VIEW = preload("res://scenes/components/card_view/card_view.tscn")
 
 @export var monster: Monster
 @export var reveal_delay: float = 0.5
-@export var monster_deal_delay: float = 0.5
 
 @onready var _player_hand_container: HBoxContainer = %PlayerHand
 @onready var _monster_hand_container: HBoxContainer = %MonsterHand
+@onready var _player_hp_bar: HealthBarController = %PlayerHealthBar
+@onready var _monster_hp_bar: HealthBarController = %MonsterHealthBar
 
 var _manager: CombatManager
 var _is_player_turn: bool = false
@@ -26,14 +27,17 @@ var _event_queue: Array = []
 var _processing_queue: bool = false
 var _monster_hole_card_view: CardViewController = null
 
+var _stats: PlayerStats
+var _player: Player
+
 # ---
 # Lifecycle
 # ---
 
 func _ready() -> void:
-	var stats := PlayerStats.new()
-	var player := Player.new(stats)
-	setup(player)
+	_stats = PlayerStats.new()
+	_player = Player.new(_stats)
+	setup(_player)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not _is_player_turn:
@@ -50,9 +54,6 @@ func _unhandled_input(event: InputEvent) -> void:
 # ---
 
 func setup(player: Player) -> void:
-	print("=== COMBAT START: Player (HP:%d) vs %s (HP:%d) ===" % [
-		player.hp, monster.display_name, monster.hp
-	])
 	_manager = CombatManager.new(player, monster)
 	_manager.round_started.connect(func(): _enqueue("round_started", null))
 	_manager.card_dealt.connect(func(t, c, fd): _enqueue("card_dealt", [t, c, fd]))
@@ -60,8 +61,14 @@ func setup(player: Player) -> void:
 	_manager.player_turn_ready.connect(func(): _enqueue("player_turn_ready", null))
 	_manager.player_bust.connect(func(t): _enqueue("player_bust", t))
 	_manager.monster_bust.connect(func(t): _enqueue("monster_bust", t))
-	_manager.round_resolved.connect(func(o): _enqueue("round_resolved", o))
+	_manager.round_resolved.connect(func(o, pt, mt): _enqueue("round_resolved", [o, pt, mt]))
 	_manager.combat_ended.connect(func(w): _enqueue("combat_ended", w))
+
+	_player_hp_bar.initialize(player, player.hp, player.stats.max_hp())
+	_player_hp_bar.connect_to_actor()
+	_monster_hp_bar.initialize(monster, monster.hp, monster.max_hp)
+	_monster_hp_bar.connect_to_actor()
+
 	_manager.start_combat()
 
 func _on_hit_pressed() -> void:
@@ -95,54 +102,33 @@ func _process_queue() -> void:
 func _handle_event(event: Dictionary) -> void:
 	match event["type"]:
 		"round_started":
-			_clear_hands()
+			_on_round_started()
 		"card_dealt":
-			var args: Array = event["data"]
-			var target: CombatManager.Target = args[0]
-			var card: CardRef = args[1]
-			var face_down: bool = args[2]
-			var card_str := "[face down]" if face_down else "%s (%d)" % [card.display_name(), card.blackjack_value()]
-			print("[DEAL] %s: %s" % [_target_name(target), card_str])
-			await _animate_deal(target, card, face_down)
+			await _on_card_dealt(event["data"])
 		"card_revealed":
-			var card: CardRef = event["data"]
-			print("[REVEAL] Monster hole card: %s (%d)" % [card.display_name(), card.blackjack_value()])
-			await _animate_reveal(card)
+			await _on_card_revealed(event["data"])
 		"player_turn_ready":
-			var player_total := _manager._player_total()
-			var monster_visible := _manager._hand_total([_manager.monster_hand[0]])
-			print("[TURN] Player: %d | Monster shows: %d — press H to hit, S to stand" % [player_total, monster_visible])
-			_is_player_turn = true
+			_on_player_turn_ready()
 		"player_bust":
-			print("[BUST] Player busts at %d" % event["data"])
-			await _animate_bust("player")
+			await _on_bust(CombatManager.Target.PLAYER, event["data"])
 		"monster_bust":
-			print("[BUST] Monster busts at %d" % event["data"])
-			await _animate_bust("monster")
+			await _on_bust(CombatManager.Target.MONSTER, event["data"])
 		"round_resolved":
-			match event["data"]:
-				"player_win":
-					print("[RESOLVE] Player wins — Monster HP: %d" % _manager.monster.hp)
-				"monster_win":
-					print("[RESOLVE] Monster wins — Player HP: %d/%d" % [_manager.player.hp, _manager.player.stats.max_hp()])
-				"tie":
-					print("[RESOLVE] Tie — no damage")
+			await _on_round_resolved(event["data"])
 		"combat_ended":
-			var winner: CombatManager.Target = event["data"]
-			print("=== COMBAT OVER: %s wins! ===" % _target_name(winner))
-			combat_finished.emit(event["data"])
+			_on_combat_ended(event["data"])
 
-func _clear_hands() -> void:
+func _on_round_started() -> void:
 	for child in _player_hand_container.get_children():
 		child.queue_free()
 	for child in _monster_hand_container.get_children():
 		child.queue_free()
 	_monster_hole_card_view = null
 
-func _target_name(target: CombatManager.Target) -> String:
-	return "Player" if target == CombatManager.Target.PLAYER else "Monster"
-
-func _animate_deal(target: CombatManager.Target, card: CardRef, face_down: bool) -> void:
+func _on_card_dealt(args: Array) -> void:
+	var target: CombatManager.Target = args[0]
+	var card: CardRef = args[1]
+	var face_down: bool = args[2]
 	var view: CardViewController = CARD_VIEW.instantiate()
 	var container := _player_hand_container if target == CombatManager.Target.PLAYER else _monster_hand_container
 	container.add_child(view)
@@ -153,14 +139,34 @@ func _animate_deal(target: CombatManager.Target, card: CardRef, face_down: bool)
 		_monster_hole_card_view = view
 	await view.animate_in()
 
-func _animate_reveal(card: CardRef) -> void:
+func _on_card_revealed(card: CardRef) -> void:
 	if _monster_hole_card_view:
 		await _monster_hole_card_view.reveal(card)
 		_monster_hole_card_view = null
 	await get_tree().create_timer(reveal_delay).timeout
 
-func _animate_bust(_target: String) -> void:
+func _on_player_turn_ready() -> void:
+	_is_player_turn = true
+
+func _on_bust(target: CombatManager.Target, _total: int) -> void:
+	var label := "Player" if target == CombatManager.Target.PLAYER else "Monster"
+	print("[BUST] %s busts at %d" % [label, _total])
 	await get_tree().create_timer(0.8).timeout
 
-func _set_buttons_enabled(_enabled: bool) -> void:
-	pass
+func _on_round_resolved(data: Array) -> void:
+	var outcome: String = data[0]
+	var player_total: int = data[1]
+	var monster_total: int = data[2]
+	match outcome:
+		"player_win":
+			print("[RESOLVE] Player wins (%d > %d)" % [player_total, monster_total])
+		"monster_win":
+			print("[RESOLVE] Monster wins (%d > %d)" % [monster_total, player_total])
+		"tie":
+			print("[RESOLVE] Tie (%d = %d)" % [player_total, monster_total])
+	_manager.on_round_complete(outcome)
+
+func _on_combat_ended(winner: CombatManager.Target) -> void:
+	var label := "Player" if winner == CombatManager.Target.PLAYER else "Monster"
+	print("=== COMBAT OVER: %s wins! ===" % label)
+	combat_finished.emit(winner)

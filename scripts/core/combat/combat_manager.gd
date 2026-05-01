@@ -20,7 +20,7 @@ signal card_revealed(card: CardRef)
 signal player_turn_ready
 signal player_bust(total: int)
 signal monster_bust(total: int)
-signal round_resolved(outcome: String)
+signal round_resolved(outcome: String, player_total: int, monster_total: int)
 signal combat_ended(winner: Target)
 
 # ---
@@ -51,7 +51,7 @@ func start_combat() -> void:
 
 func player_hit() -> void:
 	_deal_to_player()
-	var total := _player_total()
+	var total := player_total()
 	if total > 21:
 		player_bust.emit(total)
 		_resolve_round("monster_win")
@@ -60,13 +60,35 @@ func player_hit() -> void:
 
 func player_stand() -> void:
 	card_revealed.emit(monster_hand[1])
-	while monster.dealer_style.should_hit(_monster_total()):
+	var mt := monster_total()
+	while monster.dealer_style.should_hit(mt):
 		_deal_to_monster(false)
-		if _monster_total() > 21:
-			monster_bust.emit(_monster_total())
+		mt = monster_total()
+		if mt > 21:
+			monster_bust.emit(mt)
 			_resolve_round("player_win")
 			return
 	_resolve_round(_compare_hands())
+
+func on_round_complete(outcome: String) -> void:
+	_apply_damage(outcome)
+	if not monster.is_alive():
+		combat_ended.emit(Target.PLAYER)
+	elif not player.is_alive():
+		combat_ended.emit(Target.MONSTER)
+	else:
+		_start_round()
+
+func player_total() -> int:
+	return _hand_total(player_hand) + player.stats.hand_bonus
+
+func monster_upcard_total() -> int:
+	if monster_hand.is_empty():
+		return 0
+	return _hand_total([monster_hand[0]])
+
+func monster_total() -> int:
+	return _hand_total(monster_hand)
 
 func _start_round() -> void:
 	round_started.emit()
@@ -101,15 +123,9 @@ func _hand_total(hand: Array[CardRef]) -> int:
 		aces -= 1
 	return total
 
-func _player_total() -> int:
-	return _hand_total(player_hand) + player.stats.hand_bonus
-
-func _monster_total() -> int:
-	return _hand_total(monster_hand)
-
 func _compare_hands() -> String:
-	var pt := _player_total()
-	var mt := _monster_total()
+	var pt := player_total()
+	var mt := monster_total()
 	if pt > mt:
 		return "player_win"
 	elif mt > pt:
@@ -117,16 +133,12 @@ func _compare_hands() -> String:
 	else:
 		return "tie"
 
-func _resolve_round(outcome: String) -> void:
-	round_resolved.emit(outcome)
+func _apply_damage(outcome: String) -> void:
 	match outcome:
 		"player_win":
 			monster.take_damage(player.stats.damage())
 		"monster_win":
 			player.take_damage(monster.base_damage)
-	if not monster.is_alive():
-		combat_ended.emit(Target.PLAYER)
-	elif not player.is_alive():
-		combat_ended.emit(Target.MONSTER)
-	else:
-		_start_round()
+
+func _resolve_round(outcome: String) -> void:
+	round_resolved.emit(outcome, player_total(), monster_total())
