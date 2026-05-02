@@ -7,7 +7,7 @@ static func should_hit(style: Monster.PlayStyle, score: int) -> bool:
 		Monster.PlayStyle.CAUTIOUS:
 			return score < 14
 		Monster.PlayStyle.RANDOM:
-			return randi() % 2 == 0
+			return score < 21 and randi() % 2 == 0
 		Monster.PlayStyle.TACTICAL:
 			return score < 17
 		_:
