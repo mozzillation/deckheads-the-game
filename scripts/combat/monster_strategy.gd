@@ -1,13 +1,15 @@
 class_name MonsterStrategy
 
 static func should_hit(style: Monster.PlayStyle, score: int) -> bool:
+	if score >= 21:
+		return false
 	match style:
 		Monster.PlayStyle.AGGRESSIVE:
 			return score < 19
 		Monster.PlayStyle.CAUTIOUS:
 			return score < 14
 		Monster.PlayStyle.RANDOM:
-			return score < 21 and randi() % 2 == 0
+			return randi() % 2 == 0
 		Monster.PlayStyle.TACTICAL:
 			return score < 17
 		_:
