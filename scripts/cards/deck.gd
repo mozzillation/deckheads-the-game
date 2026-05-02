@@ -5,7 +5,7 @@ extends RefCounted
 # Variables
 # ---
 
-var _cards: Array[CardRef] = []
+var _cards: Array[Card] = []
 
 # ---
 # Lifecycle
@@ -21,14 +21,14 @@ func _init() -> void:
 
 func generate() -> void:
 	_cards.clear()
-	for suit in CardRef.Suit.values():
-		for rank in CardRef.Rank.values():
-			_cards.append(CardRef.new(rank, suit))
+	for suit in Card.Suit.values():
+		for rank in Card.Rank.values():
+			_cards.append(Card.new(rank, suit))
 
 func shuffle() -> void:
 	_cards.shuffle()
 
-func draw() -> CardRef:
+func draw() -> Card:
 	if _cards.is_empty():
 		generate()
 		shuffle()

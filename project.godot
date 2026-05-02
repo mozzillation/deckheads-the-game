@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Deckheads"
-run/main_scene="res://scenes/combat/combat_scene.tscn"
+run/main_scene="uid://kpyt5stp2y06"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 

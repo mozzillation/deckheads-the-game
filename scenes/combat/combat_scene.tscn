@@ -1,72 +1,9 @@
-[gd_scene format=3 uid="uid://bh4d14pygadm7"]
+[gd_scene format=3 uid="uid://kpyt5stp2y06"]
 
-[ext_resource type="Script" uid="uid://g74yjtnju2mw" path="res://scenes/combat/combat_controller.gd" id="1_jecyb"]
-[ext_resource type="Resource" uid="uid://c4xbyiyrh37ff" path="res://resources/monsters/goblin.tres" id="2_7cuye"]
-[ext_resource type="PackedScene" uid="uid://i12ng8ldvho" path="res://scenes/components/health_bar/health_bar.tscn" id="3_fyyo7"]
+[ext_resource type="Script" uid="uid://bt3jg5fy270e3" path="res://scenes/combat/combat_scene_controller.gd" id="1_jecyb"]
+[ext_resource type="PackedScene" uid="uid://b2k5sbpe2rm6k" path="res://views/hp_bar/hp_bar.tscn" id="2_7cuye"]
 
-[node name="CombatScene" type="Node2D" unique_id=564923855]
+[node name="CombatScene" type="Node2D" unique_id=1911391656]
 script = ExtResource("1_jecyb")
-monster = ExtResource("2_7cuye")
 
-[node name="BackgroundLayer" type="CanvasLayer" parent="." unique_id=388301393]
-
-[node name="Background" type="ColorRect" parent="BackgroundLayer" unique_id=245667364]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 1)
-
-[node name="UILayer" type="CanvasLayer" parent="." unique_id=102938475]
-
-[node name="Padding" type="MarginContainer" parent="UILayer" unique_id=634817293]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
-
-[node name="Table" type="VBoxContainer" parent="UILayer/Padding" unique_id=755929358]
-layout_mode = 2
-theme_override_constants/separation = 8
-alignment = 1
-
-[node name="MonsterHand" type="HBoxContainer" parent="UILayer/Padding/Table" unique_id=192837465]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 48)
-layout_mode = 2
-theme_override_constants/separation = 4
-alignment = 2
-
-[node name="PlayerHand" type="HBoxContainer" parent="UILayer/Padding/Table" unique_id=918273645]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 48)
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="PlayerHealthBar" parent="UILayer" unique_id=750063837 instance=ExtResource("3_fyyo7")]
-unique_name_in_owner = true
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = -17.0
-offset_right = 56.0
-offset_bottom = -8.0
-grow_vertical = 0
-
-[node name="MonsterHealthBar" parent="UILayer" unique_id=547446465 instance=ExtResource("3_fyyo7")]
-unique_name_in_owner = true
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -56.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = 23.0
-grow_horizontal = 0
+[node name="PlayerHPBar" parent="." unique_id=242654095 instance=ExtResource("2_7cuye")]
