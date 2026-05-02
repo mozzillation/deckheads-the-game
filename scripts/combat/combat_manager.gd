@@ -20,6 +20,7 @@ signal player_died
 # Variables
 # ---
 
+var monster: Monster
 var player: Player
 var deck: Deck
 
@@ -33,8 +34,9 @@ const _DEAL_ORDER: Array = [Target.PLAYER, Target.MONSTER, Target.PLAYER, Target
 # Lifecycle
 # ---
 
-func _init(_player: Player) -> void:
+func _init(_player: Player, _monster: Monster) -> void:
 	player = _player
+	monster = _monster
 
 # ---
 # Functions

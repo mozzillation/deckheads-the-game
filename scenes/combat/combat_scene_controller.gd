@@ -7,6 +7,7 @@ extends Node2D
 
 var _manager: CombatManager
 var _player: Player
+var _monster: Monster
 var _busy := false
 
 @onready var player_hp_bar: HPBarController = $PlayerHPBar
@@ -17,7 +18,9 @@ var _busy := false
 
 func _ready() -> void:
 	_player = Player.new()
-	_manager = CombatManager.new(_player)
+	_monster = Monster.new()
+	
+	_manager = CombatManager.new(_player, _monster)
 	_connect_signals()
 	player_hp_bar.bind(_player.hp, _player.max_hp)
 	_run_round_start()
