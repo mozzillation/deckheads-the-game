@@ -40,7 +40,7 @@ Strategy behaviors:
 
 ```gdscript
 func monster_should_hit() -> bool:
-    return MonsterStrategy.should_hit(monster.play_style, monster_hand.score())
+	return MonsterStrategy.should_hit(monster.play_style, monster_hand.score())
 ```
 
 ## Removals

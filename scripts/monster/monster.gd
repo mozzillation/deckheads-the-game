@@ -36,7 +36,7 @@ enum PlayStyle {
 @export var type: Type = Type.UNKNOWN
 @export var rarity: Rarity = Rarity.COMMON
 @export var play_style: PlayStyle = PlayStyle.TACTICAL
-@export var base_damage: int = 1
+@export var damage: int = 1
 @export var hp: int = 1
 
 var max_hp: int

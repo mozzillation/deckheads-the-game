@@ -8,6 +8,7 @@ extends RefCounted
 var hp: int = 3
 var max_hp: int
 var gold: int = 0
+var damage: int = 1
 
 # ---
 # Lifecycle

@@ -77,28 +77,35 @@ func deal_next() -> Dictionary:
 	_deal_index += 1
 	return { card = card, target = target, face_down = face_down }
 
-func player_hit() -> void:
+func player_hit() -> Dictionary:
+	assert(stage == Stage.PLAYER_TURN, "player_hit called outside PLAYER_TURN")
 	var card := deck.draw()
 	player_hand.add(card, false)
 	card_drawn.emit(card, Target.PLAYER)
-	if player_hand.is_burst():
-		player_bust.emit()
-		_resolve_round(Target.MONSTER)
+	return { card = card, target = Target.PLAYER, face_down = false }
+
+func apply_player_bust() -> void:
+	player_bust.emit()
+	_resolve_round(Target.MONSTER)
 
 func player_stand() -> void:
 	monster_hand.reveal_all()
 	monster_hand_revealed.emit()
 	_set_stage_to(Stage.MONSTER_TURN)
 
-func monster_hit() -> void:
+func monster_hit() -> Dictionary:
+	assert(stage == Stage.MONSTER_TURN, "monster_hit called outside MONSTER_TURN")
 	var card := deck.draw()
 	monster_hand.add(card, false)
 	card_drawn.emit(card, Target.MONSTER)
-	if monster_hand.is_burst():
-		monster_bust.emit()
-		_resolve_round(Target.PLAYER)
+	return { card = card, target = Target.MONSTER, face_down = false }
+
+func apply_monster_bust() -> void:
+	monster_bust.emit()
+	_resolve_round(Target.PLAYER)
 
 func monster_stand() -> void:
+	assert(stage == Stage.MONSTER_TURN, "monster_stand called outside MONSTER_TURN")
 	var wins := CombatResolution.player_wins_standoff(player_hand.score(), monster_hand.score())
 	_resolve_round(Target.PLAYER if wins else Target.MONSTER)
 
